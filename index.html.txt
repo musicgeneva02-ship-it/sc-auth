@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundCloud Auth</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f0f0; }
+        .btn { background: #ff5500; color: white; padding: 15px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; font-size: 16px; }
+        .desc { margin-bottom: 20px; text-align: center; color: #333; padding: 0 20px; }
+    </style>
+</head>
+<body>
+    <div class="desc">
+        <h3>Авторизация SoundCloud</h3>
+        <p>Нажмите кнопку ниже, войдите в свой аккаунт, и бот автоматически получит доступ для добавления треков.</p>
+    </div>
+    
+    <button class="btn" onclick="startLogin()">Войти в SoundCloud</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем окно на весь экран
+
+        function startLogin() {
+            // Открываем окно логина SoundCloud
+            const loginWin = window.open("https://soundcloud.com/signin", "_blank", "width=500,height=600");
+            
+            // Каждые 2 секунды проверяем, появился ли токен в куках
+            const checkTimer = setInterval(() => {
+                try {
+                    // Пытаемся достать токен из хранилища браузера
+                    const token = document.cookie.split('; ').find(row => row.startsWith('oauth_token='))?.split('=')[1] 
+                                  || localStorage.getItem('oauth_token');
+
+                    if (token) {
+                        clearInterval(checkTimer);
+                        loginWin.close();
+                        // ОТПРАВЛЯЕМ ТОКЕН БОТУ
+                        tg.sendData(token); 
+                        tg.close();
+                    }
+                } catch (e) {
+                    // Ошибки кросс-домена — это нормально, пока юзер не залогинится
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
