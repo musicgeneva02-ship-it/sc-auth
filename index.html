@@ -3,32 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundCloud Login</title>
+    <title>SoundCloud Connect</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f0f0; }
-        .btn { background: #ff5500; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-size: 18px; margin-top: 10px; cursor: pointer; }
-        .secondary { background: #333; margin-top: 20px; }
+        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; text-align: center; }
+        .btn { background: #ff5500; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-size: 16px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        .input-area { margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px; }
+        input { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
+        p { font-size: 14px; color: #555; line-height: 1.4; }
+        b { color: #ff5500; }
     </style>
 </head>
 <body>
-    <h3>Шаг 1</h3>
-    <a href="https://soundcloud.com/signin" target="_blank"><button class="btn">Войти в SoundCloud</button></a>
+    <h3>Подключение SoundCloud</h3>
     
-    <h3>Шаг 2</h3>
-    <p>После того как вошли в браузере, вернитесь сюда и нажмите:</p>
-    <button class="btn secondary" onclick="sendToken()">Я авторизовался, продолжить</button>
+    <p>1. Нажмите кнопку и войдите в аккаунт:</p>
+    <a href="https://soundcloud.com/signin" target="_blank"><button class="btn">Войти в браузере</button></a>
+
+    <div class="input-area">
+        <p>2. Если после входа ничего не произошло, вставьте ваш <b>OAuth Token</b> сюда:</p>
+        <input type="text" id="tokenInput" placeholder="2-2934..." />
+        <button class="btn" style="background: #333;" onclick="sendManual()">Подключить вручную</button>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        function sendToken() {
-            // Пытаемся вытащить токен
+        tg.expand();
+
+        // Авто-проверка (если сработает)
+        setInterval(() => {
             const token = document.cookie.split('; ').find(row => row.startsWith('oauth_token='))?.split('=')[1];
             if (token) {
                 tg.sendData(token);
                 tg.close();
+            }
+        }, 2000);
+
+        function sendManual() {
+            const val = document.getElementById('tokenInput').value.trim();
+            if (val.startsWith('2-')) {
+                tg.sendData(val);
+                tg.close();
             } else {
-                alert("Ошибка: Токен не найден. Пожалуйста, убедитесь, что вы вошли в аккаунт в открывшемся окне браузера и не закрыли его.");
+                alert("Токен должен начинаться на '2-'");
             }
         }
     </script>
